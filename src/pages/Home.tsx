@@ -48,56 +48,64 @@ export default function Home() {
       <main className="home-container" style={{
         maxWidth: 1200, margin: '0 auto', padding: '140px 48px 120px',
       }}>
-        {/* Hero */}
-        <div className="home-hero fade-in-up" style={{ marginBottom: 64 }}>
-          <p className="mono-label" style={{ marginBottom: 20 }}>
-            Curated Technical Knowledge
-          </p>
-          <h1 style={{
-            fontFamily: 'var(--font-sans)', fontSize: 56, fontWeight: 600,
-            letterSpacing: '-0.84px', lineHeight: 1.05, color: '#000', marginBottom: 16,
-          }}>
-            Tech Docs
-          </h1>
-          <p style={{
-            fontSize: 18, fontWeight: 400, lineHeight: '28px',
-            color: 'var(--color-meta)', maxWidth: 520, marginBottom: 32,
-          }}>
-            A collection of deeply researched technical articles, design systems,
-            and engineering knowledge — distilled for clarity.
-          </p>
+        {/* Hero - Lime Green Section */}
+        <div className="lime-hero" style={{
+          background: 'var(--color-lime)',
+          padding: '64px 48px',
+          borderRadius: 24,
+          marginBottom: 48,
+        }}>
+          <div className="home-hero fade-in-up">
+            <p className="mono-label" style={{ marginBottom: 20, color: '#555' }}>
+              Curated Technical Knowledge
+            </p>
+            <h1 style={{
+              fontFamily: 'var(--font-sans)', fontSize: 56, fontWeight: 600,
+              letterSpacing: '-0.84px', lineHeight: 1.05, color: '#000', marginBottom: 16,
+            }}>
+              Tech Docs
+            </h1>
+            <p style={{
+              fontSize: 18, fontWeight: 400, lineHeight: '28px',
+              color: '#333', maxWidth: 520, marginBottom: 32,
+            }}>
+              A collection of deeply researched technical articles, design systems,
+              and engineering knowledge — distilled for clarity.
+            </p>
 
-          {/* Stats */}
-          <div className="mono-label fade-in-up fade-in-up-delay-1" style={{
-            display: 'flex', alignItems: 'center', gap: 16, marginBottom: 48,
-          }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <BookOpen size={14} /> {totalArticles} ARTICLES
-            </span>
-            <span>·</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Layers size={14} /> {totalCategories} CATEGORIES
-            </span>
-            <span>·</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Clock size={14} /> UPDATED DAILY
-            </span>
+            {/* Stats */}
+            <div className="mono-label fade-in-up fade-in-up-delay-1" style={{
+              display: 'flex', alignItems: 'center', gap: 16, marginBottom: 48,
+              color: '#555',
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <BookOpen size={14} /> {totalArticles} ARTICLES
+              </span>
+              <span>·</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Layers size={14} /> {totalCategories} CATEGORIES
+              </span>
+              <span>·</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Clock size={14} /> UPDATED DAILY
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Search */}
-        <div className="fade-in-up fade-in-up-delay-2" style={{ position: 'relative', marginBottom: 24 }}>
-          <Search size={18} style={{
-            position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)',
-            color: '#b0b0b0', pointerEvents: 'none',
-          }} />
-          <input
-            type="text"
-            placeholder="Search articles..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="search-input"
-          />
+          {/* Search */}
+          <div className="fade-in-up fade-in-up-delay-2" style={{ position: 'relative' }}>
+            <Search size={18} style={{
+              position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)',
+              color: '#b0b0b0', pointerEvents: 'none',
+            }} />
+            <input
+              type="text"
+              placeholder="Search articles..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="search-input"
+            />
+          </div>
         </div>
 
         {/* Category Pills */}

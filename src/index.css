@@ -13,6 +13,7 @@
   --color-accent: #4d49fc;
   --color-border: #e8e8e8;
   --color-surface: #f5f5f0;
+  --color-lime: #f3ffe3;
   --color-success: #22c55e;
   --sidebar-width: 280px;
 }
@@ -208,6 +209,8 @@ a { text-decoration: none; color: inherit; }
 
 /* Responsive */
 @media (max-width: 768px) {
+  .lime-hero { padding: 32px 20px !important; }
+  .lime-reader-header { padding: 24px 20px 32px !important; }
   .sidebar { display: none; }
   .sidebar-overlay { display: block; }
   .hamburger-btn { display: flex; }

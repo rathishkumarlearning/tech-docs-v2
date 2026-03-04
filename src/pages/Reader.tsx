@@ -239,42 +239,47 @@ export default function Reader() {
 
       {/* Main Content */}
       <div className="reader-main" style={{ marginLeft: 'var(--sidebar-width)' }}>
-        {/* Header */}
-        <div style={{
-          padding: '100px 48px 48px',
-          maxWidth: 780,
-          margin: '0 auto',
-        }} className="reader-content-area">
-          <Link to="/" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            color: 'var(--color-meta)', fontSize: 14, marginBottom: 24,
+        {/* Header - Lime Green */}
+        <div className="reader-content-area" style={{
+          maxWidth: 780, margin: '0 auto', padding: '100px 48px 0',
+        }}>
+          <div className="lime-reader-header" style={{
+            background: 'var(--color-lime)',
+            padding: '40px 48px 48px',
+            borderRadius: 20,
+            marginBottom: 48,
           }}>
-            <ArrowLeft size={16} /> Back
-          </Link>
+            <Link to="/" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              color: '#555', fontSize: 14, marginBottom: 24,
+            }}>
+              <ArrowLeft size={16} /> Back
+            </Link>
 
-          <p className="mono-label fade-in-up" style={{ marginBottom: 12 }}>
-            {doc.category}
-          </p>
-          <h1 className="reader-header-title fade-in-up fade-in-up-delay-1" style={{
-            fontFamily: 'var(--font-sans)', fontSize: 42, fontWeight: 700,
-            letterSpacing: '-0.84px', lineHeight: 1.1, color: '#000', marginBottom: 16,
-          }}>
-            {doc.title}
-          </h1>
-          <p className="fade-in-up fade-in-up-delay-2" style={{
-            fontSize: 18, lineHeight: 1.6, color: 'var(--color-meta)',
-            marginBottom: 24, maxWidth: 600,
-          }}>
-            {doc.description}
-          </p>
-          <div className="mono-label fade-in-up fade-in-up-delay-3" style={{
-            display: 'flex', gap: 16, flexWrap: 'wrap',
-          }}>
-            <span>{doc.author}</span>
-            <span>·</span>
-            <span>{doc.date}</span>
-            <span>·</span>
-            <span>{doc.readTime}</span>
+            <p className="mono-label fade-in-up" style={{ marginBottom: 12, color: '#555' }}>
+              {doc.category}
+            </p>
+            <h1 className="reader-header-title fade-in-up fade-in-up-delay-1" style={{
+              fontFamily: 'var(--font-sans)', fontSize: 42, fontWeight: 700,
+              letterSpacing: '-0.84px', lineHeight: 1.1, color: '#000', marginBottom: 16,
+            }}>
+              {doc.title}
+            </h1>
+            <p className="fade-in-up fade-in-up-delay-2" style={{
+              fontSize: 18, lineHeight: 1.6, color: '#333',
+              marginBottom: 24, maxWidth: 600,
+            }}>
+              {doc.description}
+            </p>
+            <div className="mono-label fade-in-up fade-in-up-delay-3" style={{
+              display: 'flex', gap: 16, flexWrap: 'wrap', color: '#555',
+            }}>
+              <span>{doc.author}</span>
+              <span>·</span>
+              <span>{doc.date}</span>
+              <span>·</span>
+              <span>{doc.readTime}</span>
+            </div>
           </div>
         </div>
 
