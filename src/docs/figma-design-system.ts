@@ -19,9 +19,22 @@ export const figmaDesignSystem: Doc = {
       content: `
         <p>In a world of over-designed interfaces, Figma's website is a breath of fresh air. It doesn't scream for attention — it earns it through clarity, restraint, and purposeful design choices.</p>
         <p>What makes Figma's design remarkable isn't what they added — it's what they removed. No gradients on text. No glassmorphism. No noise overlays. Just clean typography on white space, with occasional pops of their signature purple.</p>
-        <blockquote>Great design is as little design as possible. — Dieter Rams</blockquote>
-        <p>This philosophy runs through every pixel of Figma's interface. Their website loads fast, reads beautifully on any device, and never makes you squint or scroll unnecessarily. It's the digital equivalent of a well-set table — everything is exactly where you'd expect it to be.</p>
+        <blockquote><p>Great design is as little design as possible. — Dieter Rams</p></blockquote>
+        <p>This philosophy runs through every pixel of Figma's interface. Their website loads fast, reads beautifully on any device, and never makes you squint or scroll unnecessarily.</p>
         <p>The key insight: <strong>readability is the ultimate feature</strong>. When your content is easy to consume, users stay longer, understand more, and come back more often.</p>
+        <h4>The Competitive Landscape</h4>
+        <p>Compare Figma's approach with competitors:</p>
+        <table>
+          <thead>
+            <tr><th>Tool</th><th>Approach</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Figma</td><td>Minimalist, typography-first</td><td>Clean, fast, scannable</td></tr>
+            <tr><td>Sketch</td><td>Moderate styling</td><td>Professional but dated</td></tr>
+            <tr><td>Adobe XD</td><td>Heavy UI chrome</td><td>Complex, slower to parse</td></tr>
+            <tr><td>Framer</td><td>Animation-heavy</td><td>Beautiful but distracting</td></tr>
+          </tbody>
+        </table>
       `
     },
     {
@@ -45,177 +58,303 @@ export const figmaDesignSystem: Doc = {
   line-height: 1.8;        /* Text that breathes */
   margin-bottom: 20px;     /* Paragraph separation */
 }</code></pre>
-        <p>The rule of thumb: <strong>when in doubt, add more space</strong>. It's far easier to feel crowded than to feel too spacious. White space communicates confidence — it says "we don't need to fill every pixel to prove our value."</p>
+        <p>The rule of thumb: <strong>when in doubt, add more space</strong>. It's far easier to feel crowded than to feel too spacious. White space communicates confidence.</p>
+        <h4>Spacing Scale</h4>
         <ul>
           <li>Hero sections: 120px+ vertical padding</li>
-          <li>Between sections: 80-100px</li>
-          <li>Card gaps: 20-24px</li>
-          <li>Content max-width: 740px (like Medium)</li>
+          <li>Between major sections: 80px</li>
+          <li>Card grid gaps: 24px</li>
+          <li>Paragraph spacing: 20px margin-bottom</li>
+          <li>Line height: 1.6 for UI, 1.8 for long-form</li>
+          <li>Letter spacing: negative on headings (-0.02em to -0.04em)</li>
         </ul>
       `
     },
     {
       id: 3,
-      title: 'Typography That Breathes',
-      duration: '2 min',
+      title: 'Typography System',
+      duration: '3 min',
       content: `
-        <p>Figma uses their custom "Figma Sans" typeface, but the closest publicly available alternative is <strong>Plus Jakarta Sans</strong> — a geometric sans-serif with similar proportions and character.</p>
-        <p>The magic is in the details: tight letter-spacing on headlines creates a modern, editorial feel. Body text uses lighter weights (330-400) for a gentle, readable texture.</p>
-        <pre><code>/* Figma's typography scale */
+        <p>Figma's typography is built on a clear hierarchy. They use <strong>Plus Jakarta Sans</strong> for headings and body, with <strong>JetBrains Mono</strong> for code and technical labels.</p>
+        <h4>The Type Scale</h4>
+        <table>
+          <thead>
+            <tr><th>Element</th><th>Size</th><th>Weight</th><th>Tracking</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Hero H1</td><td>72px</td><td>400</td><td>-1.44px</td></tr>
+            <tr><td>Page H1</td><td>56px</td><td>600</td><td>-0.84px</td></tr>
+            <tr><td>Section H2</td><td>42px</td><td>600</td><td>-0.5px</td></tr>
+            <tr><td>Card H3</td><td>24px</td><td>600</td><td>-0.24px</td></tr>
+            <tr><td>Body</td><td>18px</td><td>400</td><td>normal</td></tr>
+            <tr><td>Mono Label</td><td>12px</td><td>500</td><td>0.6px</td></tr>
+          </tbody>
+        </table>
+        <h4>Key Principles</h4>
+        <ul>
+          <li><strong>Negative letter-spacing on headings</strong> — tightens large text for a more refined look</li>
+          <li><strong>Positive letter-spacing on mono labels</strong> — opens up small uppercase text for readability</li>
+          <li><strong>Weight contrast</strong> — 400 for body, 600-700 for headings creates clear hierarchy</li>
+          <li><strong>Line height scales inversely</strong> — larger text needs less line height (1.05 for H1, 1.8 for body)</li>
+        </ul>
+        <pre><code>/* Typography implementation */
 h1 {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 72px;
-  font-weight: 400;
-  letter-spacing: -1.44px;  /* Tight tracking */
-  color: #000000;
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: -0.84px;
+  line-height: 1.05;
 }
 
-h3 {
-  font-size: 24px;
-  font-weight: 520;
-  letter-spacing: -0.24px;
-}
-
-p {
-  font-size: 18px;
-  font-weight: 330;         /* Ultra-light body */
-  line-height: 1.6;
-  color: #1a1a1a;
+.mono-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #697485;
 }</code></pre>
-        <p>Notice the weight choices: headings at 400-520 (not bold!), body at 330. This creates a subtle hierarchy without shouting. The negative letter-spacing on headlines pulls characters together for a polished, magazine-quality look.</p>
-        <blockquote>Typography is the craft of endowing human language with a durable visual form. — Robert Bringhurst</blockquote>
       `
     },
     {
       id: 4,
-      title: 'The Mono Label Pattern',
-      duration: '1 min',
+      title: 'Color Philosophy',
+      duration: '2 min',
       content: `
-        <p>One of Figma's most distinctive patterns is their use of monospace text for category labels and metadata. These small, uppercase labels in JetBrains Mono create a clear visual distinction between content and navigation.</p>
-        <pre><code>/* The mono label pattern */
-.category-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.48px;
-  text-transform: uppercase;
-  color: #697485;
-}</code></pre>
-        <p>This pattern works because it creates <strong>three distinct typographic layers</strong>:</p>
-        <ol>
-          <li><strong>Headlines</strong> — Plus Jakarta Sans, large, black, tight tracking</li>
-          <li><strong>Body text</strong> — Plus Jakarta Sans, medium, dark gray, comfortable reading</li>
-          <li><strong>Labels/Meta</strong> — JetBrains Mono, small, gray, uppercase, wide tracking</li>
-        </ol>
-        <p>Each layer is instantly recognizable, making scanning effortless. Users know exactly what's a title, what's content, and what's metadata — without thinking about it.</p>
+        <p>Figma's color palette is remarkably restrained. The entire site operates on essentially four colors:</p>
+        <table>
+          <thead>
+            <tr><th>Role</th><th>Color</th><th>Usage</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Background</td><td>#ffffff</td><td>Page background, cards</td></tr>
+            <tr><td>Primary Text</td><td>#000000</td><td>Headings, important text</td></tr>
+            <tr><td>Meta Text</td><td>#697485</td><td>Labels, descriptions, timestamps</td></tr>
+            <tr><td>Accent</td><td>#4d49fc</td><td>Links, active states, CTAs</td></tr>
+          </tbody>
+        </table>
+        <blockquote><p>Color should inform, not decorate. Every color on Figma's site has a purpose — there are no decorative gradients or background colors without function.</p></blockquote>
+        <h4>The 90/10 Rule</h4>
+        <p>90% of Figma's interface is black, white, and gray. The remaining 10% is their accent purple, used sparingly for:</p>
+        <ul>
+          <li>Interactive elements (links, buttons)</li>
+          <li>Active/selected states</li>
+          <li>Brand moments (logo, CTAs)</li>
+          <li>Focus indicators</li>
+        </ul>
+        <p>This restraint makes every splash of color meaningful. When everything is colorful, nothing stands out. When color is rare, it <strong>commands attention</strong>.</p>
       `
     },
     {
       id: 5,
-      title: 'Color with Purpose',
-      duration: '1 min',
+      title: 'Component Patterns',
+      duration: '2 min',
       content: `
-        <p>Figma's color palette is remarkably restrained. The primary palette is just black and white, with a small set of accent colors used sparingly and meaningfully.</p>
-        <table>
-          <tr><th>Color</th><th>Hex</th><th>Usage</th></tr>
-          <tr><td>Black</td><td>#000000</td><td>Headlines, primary text</td></tr>
-          <tr><td>Dark Gray</td><td>#1a1a1a</td><td>Body text</td></tr>
-          <tr><td>Meta Gray</td><td>#697485</td><td>Labels, timestamps, secondary info</td></tr>
-          <tr><td>Purple</td><td>#4d49fc</td><td>Brand accent, interactive elements</td></tr>
-          <tr><td>Coral</td><td>#ff7262</td><td>Warnings, highlights</td></tr>
-          <tr><td>Blue</td><td>#0d99ff</td><td>Links, info states</td></tr>
-          <tr><td>Green</td><td>#14ae5c</td><td>Success, positive indicators</td></tr>
-        </table>
-        <p>The key principle: <strong>color should convey meaning, not decoration</strong>. Every colored element on Figma's site has a purpose. Purple marks interactive elements. Green means success. Blue is for links. There's no gratuitous use of color.</p>
+        <p>Figma's component library follows consistent patterns that make their UI predictable and pleasant. Here are the key patterns:</p>
+        <h4>Cards</h4>
+        <pre><code>.card {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 32px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}</code></pre>
+        <h4>Buttons</h4>
+        <p>Figma uses two button styles: <strong>primary</strong> (filled accent) and <strong>secondary</strong> (outlined). Both use the same border-radius and padding for consistency.</p>
+        <pre><code>.btn-primary {
+  background: #4d49fc;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: opacity 0.2s;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #000;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 12px 24px;
+}</code></pre>
+        <h4>Pills / Tags</h4>
+        <ul>
+          <li>Border radius: 50px (fully rounded)</li>
+          <li>Active state: black bg, white text</li>
+          <li>Inactive: light gray bg (#f0f0f0)</li>
+          <li>No borders needed — background color creates distinction</li>
+        </ul>
       `
     },
     {
       id: 6,
-      title: 'Card & Component Design',
-      duration: '1 min',
+      title: 'Layout Patterns',
+      duration: '2 min',
       content: `
-        <p>Figma's card design is the epitome of "less is more." White background, a subtle 1px border in #e5e5e5, generous 24-32px padding, and 16px border-radius. That's it.</p>
-        <pre><code>/* Figma card anatomy */
-.card {
-  background: #ffffff;
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
-  padding: 32px;
-  transition: all 0.2s ease;
+        <p>Figma's layouts are deceptively simple. They rely on a few key patterns used consistently:</p>
+        <h4>Content Width</h4>
+        <table>
+          <thead>
+            <tr><th>Context</th><th>Max Width</th><th>Use Case</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Full layout</td><td>1200px</td><td>Homepage, grid sections</td></tr>
+            <tr><td>Reading content</td><td>720px</td><td>Articles, documentation</td></tr>
+            <tr><td>Narrow content</td><td>560px</td><td>Forms, hero descriptions</td></tr>
+          </tbody>
+        </table>
+        <h4>Grid System</h4>
+        <pre><code>/* Responsive grid */
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+/* On mobile: single column */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }</code></pre>
-        <p>The hover state is equally restrained: a tiny 2px lift and a very soft shadow. No border color changes, no background shifts, no scale transforms. Just a gentle acknowledgment that the element is interactive.</p>
-        <p>Inside cards, the typography hierarchy does all the heavy lifting:</p>
+        <p>The auto-fill approach means the grid naturally adapts from 3 columns on desktop to 2 on tablet to 1 on mobile — no breakpoint gymnastics required.</p>
+        <h4>Sidebar + Content Pattern</h4>
         <ul>
-          <li>Category label at top (mono, uppercase, gray)</li>
-          <li>Title below (Plus Jakarta Sans, 24px, black)</li>
-          <li>Description (18px, lighter weight, body color)</li>
-          <li>Meta info at bottom (mono, small, gray)</li>
+          <li>Sidebar: 280px fixed width, left-aligned</li>
+          <li>Content: fluid width, max-width constrained</li>
+          <li>On mobile: sidebar becomes a slide-in overlay</li>
+          <li>Hamburger button: fixed bottom-left, 48px, accent color</li>
         </ul>
       `
     },
     {
       id: 7,
-      title: 'Light vs Dark Theme',
-      duration: '2 min',
+      title: 'Motion & Interactions',
+      duration: '1 min',
       content: `
-        <p>Figma's website is unapologetically light. While dark themes have their place (code editors, media apps, nighttime reading), Figma chose light because their priority is <strong>content readability</strong>.</p>
-        <p>When to use a light theme:</p>
+        <p>Figma's approach to animation follows the same minimalist philosophy as their visual design. Motion is functional, not decorative.</p>
+        <h4>Timing Functions</h4>
+        <pre><code>/* Figma's preferred easing */
+.element {
+  /* For entrances and emphasis */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* For exits and de-emphasis */
+  transition: all 0.2s ease-out;
+  
+  /* For hover states */
+  transition: all 0.15s ease;
+}</code></pre>
+        <h4>Animation Principles</h4>
         <ul>
-          <li><strong>Content-heavy sites</strong> — articles, documentation, blogs</li>
-          <li><strong>Professional tools</strong> — dashboards, admin panels</li>
-          <li><strong>E-commerce</strong> — product pages, catalogs</li>
-          <li><strong>Print-inspired designs</strong> — portfolios, magazines</li>
+          <li><strong>Subtle transforms</strong> — hover lifts of 2-3px, never more</li>
+          <li><strong>Fade-in-up for content</strong> — 20px translateY with 0.5s duration</li>
+          <li><strong>Staggered delays</strong> — 0.1s between siblings for a cascade effect</li>
+          <li><strong>No bouncing, no overshooting</strong> — clean, professional easing</li>
+          <li><strong>Progress bars animate smoothly</strong> — 0.3s ease transition on width</li>
         </ul>
-        <p>When to use a dark theme:</p>
-        <ul>
-          <li><strong>Media consumption</strong> — video, photo galleries</li>
-          <li><strong>Developer tools</strong> — code editors, terminals</li>
-          <li><strong>Gaming & entertainment</strong> — immersive experiences</li>
-          <li><strong>Night-mode options</strong> — as an accessibility toggle</li>
-        </ul>
-        <blockquote>The best theme is the one that serves your content. Don't choose dark because it looks "cool" — choose it because it makes your content shine.</blockquote>
-        <p>Figma proves that light themes can be just as striking as dark ones. The key is <strong>contrast management</strong>: pure black on white for headlines, softer grays for body text, and strategic color accents for emphasis.</p>
+        <blockquote><p>The best animations are the ones users don't consciously notice. They just make things feel "right."</p></blockquote>
       `
     },
     {
       id: 8,
-      title: 'Applying Figma\'s Principles to Your Apps',
+      title: 'Responsive Strategy',
       duration: '2 min',
       content: `
-        <p>You don't need to copy Figma's exact styles to benefit from their philosophy. Here's a practical checklist for applying these principles:</p>
-        <ol>
-          <li><strong>Start with typography</strong> — Choose one sans-serif for content, one monospace for code/labels. Set your scale before anything else.</li>
-          <li><strong>Use negative tracking on headlines</strong> — Even -0.5px makes a noticeable difference in polish.</li>
-          <li><strong>Embrace white space</strong> — Double whatever padding you think is enough. Then add 20% more.</li>
-          <li><strong>Limit your palette</strong> — 2-3 neutrals + 2-3 accent colors. Every color needs a job.</li>
-          <li><strong>Subtle borders over shadows</strong> — 1px solid #e5e5e5 is cleaner than most box-shadows.</li>
-          <li><strong>Gentle hover states</strong> — translateY(-2px) + soft shadow. That's all you need.</li>
-          <li><strong>Mono for meta</strong> — Use monospace for dates, categories, read times. It creates instant hierarchy.</li>
-          <li><strong>Content width matters</strong> — 680-740px for readable text. Never go full-width for articles.</li>
-        </ol>
-        <pre><code>/* Your starter Figma-inspired CSS */
-:root {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --text: #000000;
-  --body: #1a1a1a;
-  --meta: #697485;
-  --border: #e5e5e5;
-  --accent: #4d49fc;
-  --bg-alt: #f5f5f0;
-}
-
-.content { max-width: 740px; margin: 0 auto; }
-h1 { letter-spacing: -1.44px; font-weight: 400; }
-.label { font-family: var(--font-mono); font-size: 12px; 
-         text-transform: uppercase; color: var(--meta); }</code></pre>
-        <p>The ultimate test: <strong>can someone read your content for 20 minutes without fatigue?</strong> If yes, your design is working. If not, strip away elements until it does.</p>
+        <p>Figma's responsive design is mobile-first in philosophy but desktop-optimized in execution. Here's their breakpoint strategy:</p>
+        <h4>Breakpoints</h4>
+        <table>
+          <thead>
+            <tr><th>Breakpoint</th><th>Target</th><th>Key Changes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>&lt; 768px</td><td>Mobile</td><td>Single column, hamburger nav, 16px padding</td></tr>
+            <tr><td>768-1024px</td><td>Tablet</td><td>2 columns, condensed spacing</td></tr>
+            <tr><td>&gt; 1024px</td><td>Desktop</td><td>Full layout, sidebar visible, 48px padding</td></tr>
+          </tbody>
+        </table>
+        <h4>Mobile-Specific Patterns</h4>
+        <ul>
+          <li><strong>Touch targets: 44px minimum</strong> — Apple's HIG recommendation</li>
+          <li><strong>Font scaling</strong> — H1 drops from 56px to 32-36px on mobile</li>
+          <li><strong>Padding reduction</strong> — 48px desktop → 16px mobile</li>
+          <li><strong>Sidebar → overlay</strong> — saves horizontal space on small screens</li>
+          <li><strong>Cards stack vertically</strong> — single column on mobile for easy scrolling</li>
+        </ul>
+        <pre><code>/* Key responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .hamburger { display: flex; }
+  
+  h1 {
+    font-size: 36px !important;
+    letter-spacing: -0.5px !important;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+}</code></pre>
       `
-    }
-  ]
+    },
+    {
+      id: 9,
+      title: 'Accessibility Considerations',
+      duration: '1 min',
+      content: `
+        <p>Clean design and accessibility go hand in hand. Figma's approach naturally supports accessibility through several patterns:</p>
+        <h4>Color Contrast</h4>
+        <ul>
+          <li><strong>#000 on #fff</strong> — 21:1 ratio (maximum possible)</li>
+          <li><strong>#697485 on #fff</strong> — 4.7:1 ratio (passes AA for large text)</li>
+          <li><strong>#4d49fc on #fff</strong> — 4.6:1 ratio (passes AA for large text)</li>
+        </ul>
+        <h4>Keyboard Navigation</h4>
+        <p>Focus indicators use the accent color with a 3px box-shadow ring:</p>
+        <pre><code>*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 73, 252, 0.3);
+  border-radius: inherit;
+}</code></pre>
+        <h4>Semantic HTML</h4>
+        <p>Every design decision should translate to proper HTML semantics:</p>
+        <ul>
+          <li>Mono labels → <code>&lt;span class="mono-label"&gt;</code> with aria attributes</li>
+          <li>Section navigation → <code>&lt;nav&gt;</code> with proper landmark roles</li>
+          <li>Progress bars → <code>role="progressbar"</code> with aria-valuenow</li>
+          <li>Code blocks → <code>&lt;pre&gt;&lt;code&gt;</code> for proper semantics</li>
+        </ul>
+      `
+    },
+    {
+      id: 10,
+      title: 'Putting It All Together',
+      duration: '1 min',
+      content: `
+        <p>Figma's design system teaches us that <strong>great design is about subtraction, not addition</strong>. Every element earns its place through function, not decoration.</p>
+        <h4>The Checklist</h4>
+        <p>When building a Figma-inspired interface, validate against these principles:</p>
+        <ul>
+          <li>✅ Is every color functional? Remove decorative colors.</li>
+          <li>✅ Does every heading have negative letter-spacing?</li>
+          <li>✅ Are mono labels uppercase with positive tracking?</li>
+          <li>✅ Is the content width constrained (720px for reading)?</li>
+          <li>✅ Do cards have subtle borders and hover lift?</li>
+          <li>✅ Is white space generous enough? Add more if unsure.</li>
+          <li>✅ Do animations feel invisible? They should enhance, not distract.</li>
+          <li>✅ Is the mobile experience touch-friendly (44px+ targets)?</li>
+        </ul>
+        <blockquote><p>The goal isn't to copy Figma — it's to internalize their principles. Restraint, clarity, and purposeful design will elevate any project.</p></blockquote>
+        <p>Apply these principles to your next project. Start with the typography. Get the type scale right, add generous white space, keep your color palette to 4-5 colors max, and you'll be 80% of the way to a beautiful, functional design.</p>
+      `
+    },
+  ],
 }
