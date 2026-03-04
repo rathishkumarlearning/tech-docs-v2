@@ -10,7 +10,7 @@ export const figmaDesignSystem: Doc = {
   source: 'figma.com',
   category: 'Design',
   tags: ['design-systems', 'typography', 'figma', 'ui-design'],
-  accent: '#a259ff',
+  accent: '#4d49fc',
   sections: [
     {
       id: 1,
@@ -121,7 +121,7 @@ p {
           <tr><td>Black</td><td>#000000</td><td>Headlines, primary text</td></tr>
           <tr><td>Dark Gray</td><td>#1a1a1a</td><td>Body text</td></tr>
           <tr><td>Meta Gray</td><td>#697485</td><td>Labels, timestamps, secondary info</td></tr>
-          <tr><td>Purple</td><td>#a259ff</td><td>Brand accent, interactive elements</td></tr>
+          <tr><td>Purple</td><td>#4d49fc</td><td>Brand accent, interactive elements</td></tr>
           <tr><td>Coral</td><td>#ff7262</td><td>Warnings, highlights</td></tr>
           <tr><td>Blue</td><td>#0d99ff</td><td>Links, info states</td></tr>
           <tr><td>Green</td><td>#14ae5c</td><td>Success, positive indicators</td></tr>
@@ -206,7 +206,7 @@ p {
   --body: #1a1a1a;
   --meta: #697485;
   --border: #e5e5e5;
-  --accent: #a259ff;
+  --accent: #4d49fc;
   --bg-alt: #f5f5f0;
 }
 

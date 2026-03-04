@@ -26,7 +26,7 @@ export default function Sidebar({ doc, activeSection, onSectionClick }: Props) {
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
               <span className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${
-                activeSection === s.id ? 'bg-[#a259ff]' : 'bg-transparent'
+                activeSection === s.id ? 'bg-[#4d49fc]' : 'bg-transparent'
               }`} />
               <span className="leading-snug">{s.title}</span>
             </button>

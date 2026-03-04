@@ -2,15 +2,13 @@
 
 :root {
   --fig-bg: #ffffff;
-  --fig-bg-alt: #f5f5f0;
+  --fig-bg-tint: #f3ffe3;
+  --fig-bg-gray: #e2e2e2;
   --fig-text: #000000;
-  --fig-text-body: #1a1a1a;
   --fig-meta: #697485;
+  --fig-muted: rgba(0,0,0,0.65);
   --fig-border: #e5e5e5;
-  --fig-purple: #a259ff;
-  --fig-coral: #ff7262;
-  --fig-blue: #0d99ff;
-  --fig-green: #14ae5c;
+  --fig-accent: #4d49fc;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -18,10 +16,10 @@
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--fig-bg);
-  color: var(--fig-text-body);
+  color: var(--fig-text);
   font-size: 18px;
-  font-weight: 400;
-  line-height: 1.6;
+  font-weight: 330;
+  line-height: 25.2px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -33,16 +31,18 @@ body {
 .reader-content h2 {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 520;
   color: #000;
   margin: 48px 0 20px;
-  letter-spacing: -0.24px;
+  letter-spacing: -0.28px;
+  line-height: 1.35;
 }
 
 .reader-content p {
   font-size: 18px;
-  line-height: 1.8;
-  color: #1a1a1a;
+  font-weight: 330;
+  line-height: 28.8px;
+  color: #000;
   margin-bottom: 20px;
 }
 
@@ -55,7 +55,7 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   line-height: 1.7;
-  color: #1a1a1a;
+  color: #000;
 }
 
 .reader-content code {
@@ -73,7 +73,7 @@ body {
 }
 
 .reader-content blockquote {
-  border-left: 3px solid var(--fig-purple);
+  border-left: 3px solid var(--fig-accent);
   padding-left: 20px;
   margin: 24px 0;
   font-style: italic;
@@ -87,7 +87,8 @@ body {
 
 .reader-content li {
   font-size: 18px;
-  line-height: 1.8;
+  font-weight: 330;
+  line-height: 28.8px;
   margin-bottom: 8px;
 }
 
@@ -101,16 +102,18 @@ body {
   background: #f5f5f0;
   text-align: left;
   padding: 12px 16px;
-  font-weight: 600;
-  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: var(--fig-meta);
 }
 
 .reader-content td {
   padding: 12px 16px;
   border-bottom: 1px solid var(--fig-border);
+  font-weight: 330;
 }
 
 .reader-content img {
