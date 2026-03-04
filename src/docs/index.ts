@@ -21,8 +21,10 @@ import { figmaDesignSystem } from './figma-design-system'
 import { reactPerformance } from './react-performance'
 import { iamFundamentals } from './iam-fundamentals'
 import { cssArchitecture } from './css-architecture'
+import { doc as claudeCodeNotebooklm } from './claude-code-notebooklm'
+import { doc as claudeCodeObsidian } from './claude-code-obsidian'
 
-export const docs: Doc[] = [figmaDesignSystem, reactPerformance, iamFundamentals, cssArchitecture]
+export const docs: Doc[] = [claudeCodeNotebooklm, claudeCodeObsidian, figmaDesignSystem, reactPerformance, iamFundamentals, cssArchitecture]
 
 export function getDoc(slug: string): Doc | undefined {
   return docs.find(d => d.slug === slug)
