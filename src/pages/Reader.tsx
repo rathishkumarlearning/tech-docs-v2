@@ -1,328 +1,229 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Menu, X, Copy, CheckCheck, BookOpen } from 'lucide-react'
 import { getDoc, docs } from '../docs'
 
-/* ============ Progress Hook (localStorage) ============ */
-function useProgress(slug: string, total: number) {
-  const [done, setDone] = useState<number[]>(() => {
-    try { return JSON.parse(localStorage.getItem(`td-progress-${slug}`) || '[]') }
-    catch { return [] }
-  })
-  const toggle = useCallback((id: number) => setDone(prev => {
-    const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    localStorage.setItem(`td-progress-${slug}`, JSON.stringify(next))
-    return next
-  }), [slug])
-  const pct = total > 0 ? Math.round((done.length / total) * 100) : 0
-  return { done, toggle, pct }
-}
-
-/* ============ Copy Button for Code Blocks ============ */
-function CopyButton({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false)
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-  return (
-    <button onClick={handleCopy} className="copy-button" style={{ opacity: 1 }}>
-      {copied ? <><CheckCheck size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
-    </button>
-  )
-}
-
-/* ============ Sidebar Content (shared desktop/mobile) ============ */
-function SidebarContent({
-  sections, activeSection, completedSections, onSectionClick, onToggleComplete, pct,
-}: {
-  sections: { id: number; title: string; duration: string }[]
-  activeSection: number
-  completedSections: number[]
-  onSectionClick: (id: number) => void
-  onToggleComplete: (id: number) => void
-  pct: number
-}) {
-  return (
-    <div>
-      <p className="mono-label" style={{ marginBottom: 20, paddingLeft: 16 }}>Sections</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {sections.map((s, i) => {
-          const isActive = activeSection === s.id
-          const isComplete = completedSections.includes(s.id)
-          return (
-            <div
-              key={s.id}
-              className={`sidebar-section ${isActive ? 'active' : ''}`}
-              onClick={() => onSectionClick(s.id)}
-            >
-              <div className="active-dot" />
-              <span className="section-number">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="section-title">{s.title}</div>
-                <div className="section-duration">{s.duration}</div>
-              </div>
-              <button
-                className={`checkmark-btn ${isComplete ? 'completed' : ''}`}
-                onClick={(e) => { e.stopPropagation(); onToggleComplete(s.id) }}
-              >
-                {isComplete && <Check size={12} color="#fff" />}
-              </button>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Progress */}
-      <div style={{ marginTop: 32, padding: '0 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span className="mono-label">Progress</span>
-          <span className="mono-label" style={{ color: pct === 100 ? 'var(--color-success)' : 'var(--color-meta)' }}>
-            {pct}%
-          </span>
-        </div>
-        <div className="progress-bar-bg">
-          <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ============ Main Reader ============ */
 export default function Reader() {
   const { slug } = useParams<{ slug: string }>()
   const doc = getDoc(slug || '')
-  const [activeSection, setActiveSection] = useState(1)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [readingProgress, setReadingProgress] = useState(0)
-  const sectionRefs = useRef<Map<number, HTMLDivElement>>(new Map())
-  const contentRef = useRef<HTMLDivElement>(null)
+  const [activeSection, setActiveSection] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  const { done, toggle, pct } = useProgress(slug || '', doc?.sections.length || 0)
+  // Prev/Next docs
+  const currentIndex = docs.findIndex(d => d.slug === slug)
+  const prevDoc = currentIndex > 0 ? docs[currentIndex - 1] : null
+  const nextDoc = currentIndex < docs.length - 1 ? docs[currentIndex + 1] : null
 
-  // Reading progress bar on scroll
+  // Scroll progress
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-      setReadingProgress(Math.min(100, progress))
-
-      // Update active section based on scroll
-      if (doc) {
-        let current = doc.sections[0]?.id || 1
-        for (const section of doc.sections) {
-          const el = sectionRefs.current.get(section.id)
-          if (el) {
-            const rect = el.getBoundingClientRect()
-            if (rect.top <= 150) current = section.id
-          }
-        }
-        setActiveSection(current)
-      }
+      setProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0)
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [doc])
+  }, [])
 
-  // Add copy buttons to code blocks after render
+  // Intersection Observer for active section
   useEffect(() => {
-    if (!contentRef.current) return
-    const pres = contentRef.current.querySelectorAll('pre')
-    pres.forEach(pre => {
-      if (pre.parentElement?.classList.contains('code-block-wrapper')) return
-      const wrapper = document.createElement('div')
-      wrapper.className = 'code-block-wrapper'
-      pre.parentNode?.insertBefore(wrapper, pre)
-      wrapper.appendChild(pre)
-
-      const btn = document.createElement('button')
-      btn.className = 'copy-button'
-      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'
-      btn.onclick = async () => {
-        const code = pre.querySelector('code')?.textContent || pre.textContent || ''
-        await navigator.clipboard.writeText(code)
-        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied'
-        setTimeout(() => {
-          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'
-        }, 2000)
-      }
-      wrapper.appendChild(btn)
-    })
-  }, [doc, activeSection])
-
-  const scrollToSection = (id: number) => {
-    const el = sectionRefs.current.get(id)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      setActiveSection(id)
-      setMobileOpen(false)
-    }
-  }
+    if (!doc) return
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = sectionRefs.current.indexOf(entry.target as HTMLDivElement)
+            if (idx >= 0) setActiveSection(idx)
+          }
+        })
+      },
+      { rootMargin: '-20% 0px -60% 0px' }
+    )
+    sectionRefs.current.forEach(ref => ref && observer.observe(ref))
+    return () => observer.disconnect()
+  }, [doc])
 
   if (!doc) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 12 }}>Document not found</h2>
-          <Link to="/" style={{ color: 'var(--color-accent)', fontSize: 16 }}>← Back to all docs</Link>
-        </div>
+      <div style={{ padding: 48, textAlign: 'center' }}>
+        <h2>Document not found</h2>
+        <Link to="/" style={{ color: '#4d49fc' }}>← Back to home</Link>
       </div>
     )
   }
 
-  // Find prev/next docs
-  const currentIdx = docs.findIndex(d => d.slug === slug)
-  const prevDoc = currentIdx > 0 ? docs[currentIdx - 1] : null
-  const nextDoc = currentIdx < docs.length - 1 ? docs[currentIdx + 1] : null
+  const scrollToSection = (idx: number) => {
+    sectionRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setSidebarOpen(false)
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff' }}>
-      {/* Reading Progress */}
-      <div className="reading-progress" style={{ width: `${readingProgress}%` }} />
+      {/* Progress bar */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        height: 3,
+        width: `${progress}%`,
+        background: '#4d49fc',
+        zIndex: 200,
+        transition: 'width 0.1s linear',
+      }} />
 
-      {/* Desktop Sidebar */}
-      <nav className="sidebar">
-        <Link to="/" style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          marginBottom: 32, color: 'var(--color-meta)', fontSize: 14,
-        }}>
-          <ArrowLeft size={16} />
-          <span>All Docs</span>
-        </Link>
-        <SidebarContent
-          sections={doc.sections}
-          activeSection={activeSection}
-          completedSections={done}
-          onSectionClick={scrollToSection}
-          onToggleComplete={toggle}
-          pct={pct}
-        />
-      </nav>
-
-      {/* Mobile Hamburger */}
-      <button className="hamburger-btn" onClick={() => setMobileOpen(true)}>
-        <Menu size={22} />
-      </button>
-
-      {/* Mobile Overlay */}
-      <div
-        className={`sidebar-overlay ${mobileOpen ? 'open' : ''}`}
-        style={{ display: mobileOpen ? 'block' : undefined }}
-        onClick={() => setMobileOpen(false)}
-      />
-      <div className={`mobile-sidebar ${mobileOpen ? 'open' : ''}`}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-meta)', fontSize: 14 }}>
-            <ArrowLeft size={16} /> All Docs
-          </Link>
-          <button
-            onClick={() => setMobileOpen(false)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-          >
-            <X size={20} color="var(--color-meta)" />
-          </button>
-        </div>
-        <SidebarContent
-          sections={doc.sections}
-          activeSection={activeSection}
-          completedSections={done}
-          onSectionClick={scrollToSection}
-          onToggleComplete={toggle}
-          pct={pct}
-        />
-      </div>
-
-      {/* Main Content */}
-      <div className="reader-main" style={{ marginLeft: 'var(--sidebar-width)' }}>
-        {/* Header - Lime Green */}
-        <div className="reader-content-area" style={{
-          maxWidth: 780, margin: '0 auto', padding: '100px 48px 0',
-        }}>
-          <div className="lime-reader-header" style={{
-            background: 'var(--color-lime)',
-            padding: '40px 48px 48px',
-            borderRadius: 20,
-            marginBottom: 48,
+      {/* Header */}
+      <header style={{
+        background: '#f3ffe3',
+        padding: '48px 20px 56px',
+      }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <Link to="/" style={{
+            textDecoration: 'none',
+            fontSize: 14,
+            color: '#697485',
+            display: 'inline-block',
+            marginBottom: 20,
           }}>
-            <Link to="/" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              color: '#555', fontSize: 14, marginBottom: 24,
-            }}>
-              <ArrowLeft size={16} /> Back
-            </Link>
-
-            <p className="mono-label fade-in-up" style={{ marginBottom: 12, color: '#555' }}>
-              {doc.category}
-            </p>
-            <h1 className="reader-header-title fade-in-up fade-in-up-delay-1" style={{
-              fontFamily: 'var(--font-sans)', fontSize: 42, fontWeight: 700,
-              letterSpacing: '-0.84px', lineHeight: 1.1, color: '#000', marginBottom: 16,
-            }}>
-              {doc.title}
-            </h1>
-            <p className="fade-in-up fade-in-up-delay-2" style={{
-              fontSize: 18, lineHeight: 1.6, color: '#333',
-              marginBottom: 24, maxWidth: 600,
-            }}>
-              {doc.description}
-            </p>
-            <div className="mono-label fade-in-up fade-in-up-delay-3" style={{
-              display: 'flex', gap: 16, flexWrap: 'wrap', color: '#555',
-            }}>
-              <span>{doc.author}</span>
-              <span>·</span>
-              <span>{doc.date}</span>
-              <span>·</span>
-              <span>{doc.readTime}</span>
-            </div>
+            ← Back to articles
+          </Link>
+          <p className="mono-label" style={{ marginBottom: 12 }}>{doc.category}</p>
+          <h1 style={{
+            fontSize: 'clamp(32px, 5vw, 48px)',
+            fontWeight: 600,
+            letterSpacing: '-0.84px',
+            lineHeight: 1.15,
+            marginBottom: 16,
+          }}>
+            {doc.title}
+          </h1>
+          <p style={{ fontSize: 18, color: '#697485', lineHeight: 1.6, maxWidth: 600, marginBottom: 20 }}>
+            {doc.description}
+          </p>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            <span className="mono-label">{doc.author}</span>
+            <span className="mono-label">{doc.readTime}</span>
+            <span className="mono-label">{doc.date}</span>
+            <span className="mono-label">{doc.sections.length} sections</span>
           </div>
         </div>
+      </header>
 
-        {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0 48px' }} />
+      {/* Main layout */}
+      <div style={{
+        display: 'flex',
+        maxWidth: 1120,
+        margin: '0 auto',
+        position: 'relative',
+      }}>
+        {/* Desktop Sidebar */}
+        <aside style={{
+          width: 280,
+          flexShrink: 0,
+          position: 'sticky',
+          top: 20,
+          alignSelf: 'flex-start',
+          padding: '40px 24px',
+          display: 'none',
+        }} className="desktop-sidebar">
+          <p className="mono-label" style={{ marginBottom: 20 }}>Sections</p>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {doc.sections.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(i)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  background: 'none',
+                  border: 'none',
+                  borderLeft: activeSection === i ? '3px solid #4d49fc' : '3px solid transparent',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: 14,
+                  fontWeight: activeSection === i ? 600 : 400,
+                  color: activeSection === i ? '#1a1a1a' : '#697485',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '0 6px 6px 0',
+                }}
+              >
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  color: '#697485',
+                  minWidth: 20,
+                }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span style={{ lineHeight: 1.3 }}>{s.title}</span>
+              </button>
+            ))}
+          </nav>
+          <div style={{
+            marginTop: 24,
+            padding: '12px 0',
+            borderTop: '1px solid #e8e8e8',
+          }}>
+            <span className="mono-label">{Math.round(progress)}% complete</span>
+          </div>
+        </aside>
 
-        {/* Sections */}
-        <div ref={contentRef} className="reader-content-area" style={{
-          maxWidth: 780, margin: '0 auto', padding: '48px 48px 80px',
+        {/* Content */}
+        <main style={{
+          flex: 1,
+          maxWidth: 720,
+          margin: '0 auto',
+          padding: '48px 20px 80px',
         }}>
           {doc.sections.map((section, i) => (
             <div
               key={section.id}
-              ref={el => { if (el) sectionRefs.current.set(section.id, el) }}
-              style={{ scrollMarginTop: 80 }}
+              ref={el => { sectionRefs.current[i] = el }}
+              style={{
+                paddingTop: 8,
+                marginBottom: 0,
+              }}
             >
-              {i > 0 && <hr className="section-divider" />}
-
-              {/* Section Header */}
+              {i > 0 && (
+                <hr style={{
+                  border: 'none',
+                  borderTop: '1px solid #e8e8e8',
+                  margin: '48px 0',
+                }} />
+              )}
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                marginBottom: 24,
               }}>
-                <span className="mono-label" style={{
-                  background: 'var(--color-surface)', padding: '4px 10px',
-                  borderRadius: 8, fontSize: 11,
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 13,
+                  color: '#697485',
                 }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <h2 style={{
-                  fontFamily: 'var(--font-sans)', fontSize: 28, fontWeight: 600,
-                  letterSpacing: '-0.4px', color: '#000', flex: 1,
+                  fontSize: 24,
+                  fontWeight: 600,
+                  letterSpacing: '-0.24px',
+                  flex: 1,
                 }}>
                   {section.title}
                 </h2>
                 <span className="mono-label" style={{
-                  background: 'var(--color-surface)', padding: '4px 10px',
-                  borderRadius: 8, fontSize: 11, flexShrink: 0,
+                  background: '#f5f5f0',
+                  padding: '4px 10px',
+                  borderRadius: 8,
+                  flexShrink: 0,
                 }}>
                   {section.duration}
                 </span>
               </div>
-
-              {/* Section Content (HTML) */}
               <div
                 className="reader-content"
                 dangerouslySetInnerHTML={{ __html: section.content }}
@@ -330,40 +231,161 @@ export default function Reader() {
             </div>
           ))}
 
-          {/* Prev/Next Navigation */}
+          {/* Prev/Next */}
           <div style={{
-            display: 'flex', gap: 16, marginTop: 80,
-            flexDirection: window.innerWidth < 768 ? 'column' : 'row',
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 16,
+            marginTop: 64,
+            paddingTop: 32,
+            borderTop: '1px solid #e8e8e8',
+            flexWrap: 'wrap',
           }}>
             {prevDoc ? (
-              <Link to={`/doc/${prevDoc.slug}`} className="nav-card" style={{ textAlign: 'left' }}>
-                <div className="mono-label" style={{ marginBottom: 8 }}>
-                  <ChevronLeft size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> Previous
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 600, color: '#000' }}>{prevDoc.title}</div>
+              <Link to={`/doc/${prevDoc.slug}`} style={{
+                textDecoration: 'none',
+                padding: '16px 20px',
+                border: '1px solid #e8e8e8',
+                borderRadius: 12,
+                flex: 1,
+                minWidth: 200,
+                transition: 'all 0.2s ease',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#4d49fc'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e8e8'}
+              >
+                <span className="mono-label">Previous</span>
+                <p style={{ fontSize: 16, fontWeight: 600, marginTop: 4 }}>{prevDoc.title}</p>
               </Link>
-            ) : <div style={{ flex: 1 }} />}
+            ) : <div />}
             {nextDoc ? (
-              <Link to={`/doc/${nextDoc.slug}`} className="nav-card" style={{ textAlign: 'right' }}>
-                <div className="mono-label" style={{ marginBottom: 8 }}>
-                  Next <ChevronRight size={14} style={{ display: 'inline', verticalAlign: 'middle' }} />
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 600, color: '#000' }}>{nextDoc.title}</div>
+              <Link to={`/doc/${nextDoc.slug}`} style={{
+                textDecoration: 'none',
+                padding: '16px 20px',
+                border: '1px solid #e8e8e8',
+                borderRadius: 12,
+                flex: 1,
+                minWidth: 200,
+                textAlign: 'right',
+                transition: 'all 0.2s ease',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#4d49fc'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e8e8'}
+              >
+                <span className="mono-label">Next</span>
+                <p style={{ fontSize: 16, fontWeight: 600, marginTop: 4 }}>{nextDoc.title}</p>
               </Link>
-            ) : <div style={{ flex: 1 }} />}
+            ) : <div />}
           </div>
-
-          {/* Back to all docs */}
-          <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <Link to="/" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              color: 'var(--color-accent)', fontSize: 15, fontWeight: 500,
-            }}>
-              <BookOpen size={16} /> Back to all docs
-            </Link>
-          </div>
-        </div>
+        </main>
       </div>
+
+      {/* Mobile sidebar toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          position: 'fixed',
+          bottom: 24,
+          left: 24,
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          background: '#1a1a1a',
+          color: '#fff',
+          border: 'none',
+          fontSize: 20,
+          cursor: 'pointer',
+          zIndex: 150,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        className="mobile-sidebar-toggle"
+      >
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <>
+          <div
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.3)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 160,
+            }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: 300,
+            background: '#fff',
+            zIndex: 170,
+            padding: '32px 24px',
+            overflowY: 'auto',
+            boxShadow: '4px 0 30px rgba(0,0,0,0.1)',
+          }}>
+            <p className="mono-label" style={{ marginBottom: 20 }}>Sections</p>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {doc.sections.map((s, i) => (
+                <button
+                  key={s.id}
+                  onClick={() => scrollToSection(i)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 12px',
+                    background: 'none',
+                    border: 'none',
+                    borderLeft: activeSection === i ? '3px solid #4d49fc' : '3px solid transparent',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    fontSize: 14,
+                    fontWeight: activeSection === i ? 600 : 400,
+                    color: activeSection === i ? '#1a1a1a' : '#697485',
+                    textAlign: 'left',
+                    borderRadius: '0 6px 6px 0',
+                  }}
+                >
+                  <span style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    color: '#697485',
+                    minWidth: 20,
+                  }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span style={{ lineHeight: 1.3 }}>{s.title}</span>
+                </button>
+              ))}
+            </nav>
+            <div style={{
+              marginTop: 24,
+              padding: '12px 0',
+              borderTop: '1px solid #e8e8e8',
+            }}>
+              <span className="mono-label">{Math.round(progress)}% complete</span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* CSS for desktop sidebar visibility */}
+      <style>{`
+        .desktop-sidebar { display: none !important; }
+        .mobile-sidebar-toggle { display: flex !important; }
+        @media (min-width: 1024px) {
+          .desktop-sidebar { display: block !important; }
+          .mobile-sidebar-toggle { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }
