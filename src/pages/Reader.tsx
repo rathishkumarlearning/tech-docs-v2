@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getDoc, docs } from '../docs'
 
@@ -7,26 +7,28 @@ export default function Reader() {
   const doc = getDoc(slug || '')
   const [activeSection, setActiveSection] = useState(0)
   const [progress, setProgress] = useState(0)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [claps, setClaps] = useState(Math.floor(Math.random() * 800) + 50)
+  const [bookmarked, setBookmarked] = useState(false)
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // Prev/Next docs
   const currentIndex = docs.findIndex(d => d.slug === slug)
   const prevDoc = currentIndex > 0 ? docs[currentIndex - 1] : null
   const nextDoc = currentIndex < docs.length - 1 ? docs[currentIndex + 1] : null
 
-  // Scroll progress
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [slug])
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight - window.innerHeight
       setProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0)
     }
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Intersection Observer for active section
   useEffect(() => {
     if (!doc) return
     const observer = new IntersectionObserver(
@@ -46,344 +48,425 @@ export default function Reader() {
 
   if (!doc) {
     return (
-      <div style={{ padding: 48, textAlign: 'center' }}>
-        <h2>Document not found</h2>
-        <Link to="/" style={{ color: '#4d49fc' }}>← Back to home</Link>
+      <div style={{ padding: 48, textAlign: 'center', fontFamily: 'var(--font-ui)' }}>
+        <h2 style={{ fontFamily: 'var(--font-serif)', marginBottom: 16 }}>Document not found</h2>
+        <Link to="/" style={{ color: 'var(--green)' }}>← Back to home</Link>
       </div>
     )
   }
 
   const scrollToSection = (idx: number) => {
     sectionRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    setSidebarOpen(false)
   }
 
+  const authorInitials = doc.author.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+
   return (
-    <div style={{ minHeight: '100vh', background: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--cream)', fontFamily: 'var(--font-ui)' }}>
+
       {/* Progress bar */}
       <div style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
+        top: 0, left: 0,
         height: 3,
         width: `${progress}%`,
-        background: '#4d49fc',
+        background: '#000',
         zIndex: 200,
         transition: 'width 0.1s linear',
       }} />
 
-      {/* Header */}
-      <header style={{
-        background: '#f3ffe3',
-        padding: '48px 20px 56px',
-      }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <Link to="/" style={{
-            textDecoration: 'none',
-            fontSize: 14,
-            color: '#697485',
-            display: 'inline-block',
-            marginBottom: 20,
-          }}>
-            ← Back to articles
-          </Link>
-          <p className="mono-label" style={{ marginBottom: 12 }}>{doc.category}</p>
-          <h1 style={{
-            fontSize: 'clamp(32px, 5vw, 48px)',
-            fontWeight: 600,
-            letterSpacing: '-0.84px',
-            lineHeight: 1.15,
-            marginBottom: 16,
-          }}>
-            {doc.title}
-          </h1>
-          <p style={{ fontSize: 18, color: '#697485', lineHeight: 1.6, maxWidth: 600, marginBottom: 20 }}>
-            {doc.description}
-          </p>
-          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-            <span className="mono-label">{doc.author}</span>
-            <span className="mono-label">{doc.readTime}</span>
-            <span className="mono-label">{doc.date}</span>
-            <span className="mono-label">{doc.sections.length} sections</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main layout */}
-      <div style={{
+      {/* Navbar */}
+      <nav style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'var(--cream)',
+        borderBottom: '1px solid rgba(0,0,0,0.15)',
+        height: 57,
         display: 'flex',
-        maxWidth: 1120,
-        margin: '0 auto',
-        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
       }}>
-        {/* Desktop Sidebar */}
+        <Link to="/" style={{
+          textDecoration: 'none',
+          fontFamily: 'var(--font-serif)',
+          fontSize: 22,
+          fontWeight: 700,
+          color: 'var(--dark)',
+          letterSpacing: '-0.3px',
+        }}>
+          Tech Docs
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button
+            onClick={() => setBookmarked(b => !b)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 18, color: bookmarked ? 'var(--dark)' : 'var(--text-muted)',
+            }}
+            title="Bookmark"
+          >
+            {bookmarked ? '🔖' : '🔖'}
+          </button>
+          <Link to="/" style={{
+            fontFamily: 'var(--font-ui)',
+            fontSize: 14,
+            color: 'var(--text-secondary)',
+            textDecoration: 'none',
+          }}>
+            ← All articles
+          </Link>
+        </div>
+      </nav>
+
+      {/* Page layout */}
+      <div style={{
+        maxWidth: 1200,
+        margin: '0 auto',
+        padding: '0 24px',
+        display: 'flex',
+        gap: 80,
+        alignItems: 'flex-start',
+      }}>
+
+        {/* MAIN CONTENT — 680px centered */}
+        <main style={{
+          flex: 1,
+          maxWidth: 680,
+          margin: '0 auto',
+          paddingTop: 56,
+          paddingBottom: 80,
+          minWidth: 0,
+        }}>
+
+          {/* Article header */}
+          <header style={{ marginBottom: 40 }}>
+            {/* Category tag */}
+            <span style={{
+              fontFamily: 'var(--font-ui)',
+              fontSize: 13,
+              color: 'var(--green)',
+              display: 'block',
+              marginBottom: 16,
+            }}>
+              {doc.category}
+            </span>
+
+            {/* Title */}
+            <h1 style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 42,
+              fontWeight: 700,
+              letterSpacing: '-0.5px',
+              lineHeight: '52px',
+              color: 'var(--dark)',
+              marginBottom: 16,
+            }}>
+              {doc.title}
+            </h1>
+
+            {/* Subtitle */}
+            <p style={{
+              fontFamily: 'var(--font-ui)',
+              fontSize: 22,
+              fontWeight: 400,
+              color: 'var(--text-secondary)',
+              lineHeight: 1.5,
+              marginBottom: 28,
+            }}>
+              {doc.description}
+            </p>
+
+            {/* Author row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                background: 'var(--dark)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-ui)',
+                fontSize: 14,
+                fontWeight: 600,
+                flexShrink: 0,
+              }}>
+                {authorInitials}
+              </div>
+              <div>
+                <div style={{
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: 'var(--dark)',
+                }}>
+                  {doc.author}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 14,
+                  color: 'var(--text-muted)',
+                }}>
+                  {doc.date} · {doc.readTime}
+                </div>
+              </div>
+            </div>
+
+            {/* Social actions row */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              paddingBottom: 24,
+              borderBottom: '1px solid rgba(0,0,0,0.1)',
+            }}>
+              <button
+                onClick={() => setClaps(c => c + 1)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 14,
+                  color: 'var(--text-secondary)',
+                  padding: 0,
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--dark)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
+              >
+                <span style={{ fontSize: 20 }}>👏</span> {claps}
+              </button>
+              <button
+                onClick={() => setBookmarked(b => !b)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: 'var(--font-ui)', fontSize: 14,
+                  color: bookmarked ? 'var(--dark)' : 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', gap: 6, padding: 0,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>🔖</span> Save
+              </button>
+              <button
+                onClick={() => navigator.share?.({ title: doc.title, url: window.location.href }).catch(() => {})}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: 'var(--font-ui)', fontSize: 14,
+                  color: 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', gap: 6, padding: 0,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>↗</span> Share
+              </button>
+            </div>
+
+            {/* Hero image placeholder */}
+            <div style={{
+              width: '100%',
+              height: 380,
+              background: `linear-gradient(135deg, #e8f0fe 0%, #c3d5f5 100%)`,
+              marginTop: 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 40,
+                fontWeight: 700,
+                color: 'rgba(0,0,0,0.12)',
+              }}>
+                {doc.title.split(' ').slice(0, 3).join(' ')}
+              </span>
+            </div>
+          </header>
+
+          {/* Article body — sections */}
+          <div className="article-body">
+            {doc.sections.map((section: any, i: number) => (
+              <div
+                key={section.id}
+                ref={el => { sectionRefs.current[i] = el }}
+              >
+                {i > 0 && (
+                  <div style={{
+                    textAlign: 'center',
+                    color: 'var(--text-muted)',
+                    fontSize: 24,
+                    letterSpacing: 8,
+                    margin: '48px 0',
+                  }}>
+                    ···
+                  </div>
+                )}
+                <h2 style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 28,
+                  fontWeight: 700,
+                  marginTop: i === 0 ? 0 : 8,
+                  marginBottom: 20,
+                  color: 'var(--dark)',
+                  letterSpacing: '-0.3px',
+                }}>
+                  {section.title}
+                </h2>
+                <div dangerouslySetInnerHTML={{ __html: section.content }} />
+              </div>
+            ))}
+          </div>
+
+          {/* Author card */}
+          <div style={{
+            marginTop: 64,
+            paddingTop: 32,
+            borderTop: '1px solid rgba(0,0,0,0.1)',
+          }}>
+            <p style={{
+              fontFamily: 'var(--font-ui)',
+              fontSize: 13,
+              color: 'var(--text-muted)',
+              marginBottom: 16,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+            }}>
+              Written by
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: '50%',
+                background: 'var(--dark)', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--font-ui)', fontSize: 18, fontWeight: 600,
+              }}>
+                {authorInitials}
+              </div>
+              <div>
+                <div style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 18, fontWeight: 700, color: 'var(--dark)',
+                }}>
+                  {doc.author}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 14, color: 'var(--text-muted)', marginTop: 4,
+                }}>
+                  Technical writer & engineer
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* More from Chase AI */}
+          {(prevDoc || nextDoc) && (
+            <div style={{ marginTop: 56 }}>
+              <p style={{
+                fontFamily: 'var(--font-ui)',
+                fontSize: 13,
+                color: 'var(--text-muted)',
+                marginBottom: 24,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+              }}>
+                More from Chase AI
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {[prevDoc, nextDoc].filter(Boolean).map((d, i, arr) => d && (
+                  <Link key={d.slug} to={`/doc/${d.slug}`} style={{
+                    textDecoration: 'none',
+                    padding: '20px 0',
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.1)' : 'none',
+                    display: 'block',
+                  }}>
+                    <span style={{ fontFamily: 'var(--font-ui)', fontSize: 13, color: 'var(--green)', display: 'block', marginBottom: 6 }}>
+                      {d.category}
+                    </span>
+                    <span style={{
+                      fontFamily: 'var(--font-serif)',
+                      fontSize: 20, fontWeight: 700, color: 'var(--dark)',
+                      lineHeight: 1.3, display: 'block', marginBottom: 6,
+                    }}>
+                      {d.title}
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-ui)', fontSize: 13, color: 'var(--text-muted)' }}>
+                      {d.readTime} · {d.date}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* Floating TOC — right side, desktop only */}
         <aside style={{
-          width: 280,
+          width: 220,
           flexShrink: 0,
           position: 'sticky',
-          top: 20,
+          top: 80,
           alignSelf: 'flex-start',
-          padding: '40px 24px',
+          paddingTop: 56,
+          paddingBottom: 40,
           display: 'none',
-        }} className="desktop-sidebar">
-          <p className="mono-label" style={{ marginBottom: 20 }}>Sections</p>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {doc.sections.map((s, i) => (
+        }} className="reader-toc">
+          <p style={{
+            fontFamily: 'var(--font-ui)',
+            fontSize: 11,
+            fontWeight: 600,
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            marginBottom: 16,
+          }}>
+            Contents
+          </p>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {doc.sections.map((s: any, i: number) => (
               <button
                 key={s.id}
                 onClick={() => scrollToSection(i)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 12px',
                   background: 'none',
                   border: 'none',
-                  borderLeft: activeSection === i ? '3px solid #4d49fc' : '3px solid transparent',
+                  borderLeft: activeSection === i ? '2px solid var(--dark)' : '2px solid transparent',
+                  padding: '6px 12px',
                   cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: 14,
-                  fontWeight: activeSection === i ? 600 : 400,
-                  color: activeSection === i ? '#1a1a1a' : '#697485',
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: 13,
+                  fontWeight: activeSection === i ? 500 : 400,
+                  color: activeSection === i ? 'var(--dark)' : 'var(--text-muted)',
                   textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                  borderRadius: '0 6px 6px 0',
+                  lineHeight: 1.3,
+                  transition: 'all 0.15s ease',
                 }}
               >
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: '#697485',
-                  minWidth: 20,
-                }}>
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span style={{ lineHeight: 1.3 }}>{s.title}</span>
+                {s.title}
               </button>
             ))}
           </nav>
           <div style={{
             marginTop: 24,
-            padding: '12px 0',
-            borderTop: '1px solid #e8e8e8',
+            paddingTop: 16,
+            borderTop: '1px solid var(--border)',
+            fontFamily: 'var(--font-ui)',
+            fontSize: 12,
+            color: 'var(--text-muted)',
           }}>
-            <span className="mono-label">{Math.round(progress)}% complete</span>
+            {Math.round(progress)}% read
           </div>
         </aside>
-
-        {/* Content */}
-        <main style={{
-          flex: 1,
-          maxWidth: 720,
-          margin: '0 auto',
-          padding: '48px 20px 80px',
-        }}>
-          {doc.sections.map((section, i) => (
-            <div
-              key={section.id}
-              ref={el => { sectionRefs.current[i] = el }}
-              style={{
-                paddingTop: 8,
-                marginBottom: 0,
-              }}
-            >
-              {i > 0 && (
-                <hr style={{
-                  border: 'none',
-                  borderTop: '1px solid #e8e8e8',
-                  margin: '48px 0',
-                }} />
-              )}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                marginBottom: 24,
-              }}>
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 13,
-                  color: '#697485',
-                }}>
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <h2 style={{
-                  fontSize: 24,
-                  fontWeight: 600,
-                  letterSpacing: '-0.24px',
-                  flex: 1,
-                }}>
-                  {section.title}
-                </h2>
-                <span className="mono-label" style={{
-                  background: '#f5f5f0',
-                  padding: '4px 10px',
-                  borderRadius: 8,
-                  flexShrink: 0,
-                }}>
-                  {section.duration}
-                </span>
-              </div>
-              <div
-                className="reader-content"
-                dangerouslySetInnerHTML={{ __html: section.content }}
-              />
-            </div>
-          ))}
-
-          {/* Prev/Next */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 16,
-            marginTop: 64,
-            paddingTop: 32,
-            borderTop: '1px solid #e8e8e8',
-            flexWrap: 'wrap',
-          }}>
-            {prevDoc ? (
-              <Link to={`/doc/${prevDoc.slug}`} style={{
-                textDecoration: 'none',
-                padding: '16px 20px',
-                border: '1px solid #e8e8e8',
-                borderRadius: 12,
-                flex: 1,
-                minWidth: 200,
-                transition: 'all 0.2s ease',
-              }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = '#4d49fc'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e8e8'}
-              >
-                <span className="mono-label">Previous</span>
-                <p style={{ fontSize: 16, fontWeight: 600, marginTop: 4 }}>{prevDoc.title}</p>
-              </Link>
-            ) : <div />}
-            {nextDoc ? (
-              <Link to={`/doc/${nextDoc.slug}`} style={{
-                textDecoration: 'none',
-                padding: '16px 20px',
-                border: '1px solid #e8e8e8',
-                borderRadius: 12,
-                flex: 1,
-                minWidth: 200,
-                textAlign: 'right',
-                transition: 'all 0.2s ease',
-              }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = '#4d49fc'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e8e8'}
-              >
-                <span className="mono-label">Next</span>
-                <p style={{ fontSize: 16, fontWeight: 600, marginTop: 4 }}>{nextDoc.title}</p>
-              </Link>
-            ) : <div />}
-          </div>
-        </main>
       </div>
 
-      {/* Mobile sidebar toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        style={{
-          position: 'fixed',
-          bottom: 24,
-          left: 24,
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          background: '#1a1a1a',
-          color: '#fff',
-          border: 'none',
-          fontSize: 20,
-          cursor: 'pointer',
-          zIndex: 150,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        className="mobile-sidebar-toggle"
-      >
-        {sidebarOpen ? '✕' : '☰'}
-      </button>
-
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <>
-          <div
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0,0,0,0.3)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 160,
-            }}
-          />
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: 300,
-            background: '#fff',
-            zIndex: 170,
-            padding: '32px 24px',
-            overflowY: 'auto',
-            boxShadow: '4px 0 30px rgba(0,0,0,0.1)',
-          }}>
-            <p className="mono-label" style={{ marginBottom: 20 }}>Sections</p>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {doc.sections.map((s, i) => (
-                <button
-                  key={s.id}
-                  onClick={() => scrollToSection(i)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '10px 12px',
-                    background: 'none',
-                    border: 'none',
-                    borderLeft: activeSection === i ? '3px solid #4d49fc' : '3px solid transparent',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    fontSize: 14,
-                    fontWeight: activeSection === i ? 600 : 400,
-                    color: activeSection === i ? '#1a1a1a' : '#697485',
-                    textAlign: 'left',
-                    borderRadius: '0 6px 6px 0',
-                  }}
-                >
-                  <span style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 11,
-                    color: '#697485',
-                    minWidth: 20,
-                  }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span style={{ lineHeight: 1.3 }}>{s.title}</span>
-                </button>
-              ))}
-            </nav>
-            <div style={{
-              marginTop: 24,
-              padding: '12px 0',
-              borderTop: '1px solid #e8e8e8',
-            }}>
-              <span className="mono-label">{Math.round(progress)}% complete</span>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* CSS for desktop sidebar visibility */}
       <style>{`
-        .desktop-sidebar { display: none !important; }
-        .mobile-sidebar-toggle { display: flex !important; }
-        @media (min-width: 1024px) {
-          .desktop-sidebar { display: block !important; }
-          .mobile-sidebar-toggle { display: none !important; }
+        @media (min-width: 1100px) {
+          .reader-toc { display: block !important; }
         }
       `}</style>
     </div>
